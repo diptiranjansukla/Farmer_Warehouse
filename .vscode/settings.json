@@ -1,0 +1,19 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "xprotocol",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 500,
+            "server": "localhost",
+            "port": 33060,
+            "driver": "MySQL",
+            "name": "MySQL Local",
+            "username": "root",
+            "password": "Sukla@123",
+            "database": "farmer_warehouse_db",
+            "connectionTimeout": 1000
+        }
+    ]
+}
