@@ -1,15 +1,29 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_restful import Api, Resource, reqparse
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timezone
-import re  
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
+import re
 
 app = Flask(__name__)
 api = Api(app)
+auth = HTTPBasicAuth()
+
+users = {
+    "admin": generate_password_hash("password123"),
+}
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:Sukla%40123@localhost/farmer_warehouse_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_size': 10,              
+    'max_overflow': 20,           
+    'pool_timeout': 30,           
+    'pool_recycle': 1800,         
+}
 
 db = SQLAlchemy(app)
 
@@ -54,11 +68,9 @@ class FarmerWarehouseCommodity(db.Model):
     warehouse = db.relationship('Warehouse', backref=db.backref('farmer_warehouse_commodity', lazy=True))
     commodity = db.relationship('Commodity', backref=db.backref('farmer_warehouse_commodity', lazy=True))
 
-# Create all tables when the app starts
 with app.app_context():
     db.create_all()
 
-# Receipt validation function
 def validate_receipt(receipt):
     if not receipt or receipt.strip() == "":
         return False, "Receipt cannot be empty."
@@ -68,8 +80,14 @@ def validate_receipt(receipt):
         return False, "Receipt already exists. Please provide a unique receipt."
     return True, None
 
-# Resource for Farmer (CRUD operations)
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and check_password_hash(users.get(username), password):
+        return username
+    return None
+
 class FarmerResource(Resource):
+    @auth.login_required  
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', required=True, help="ID cannot be blank!")
@@ -97,9 +115,11 @@ class FarmerResource(Resource):
         except SQLAlchemyError as e:
             db.session.rollback()
             return {'message': 'Database error', 'data': str(e)}, 500
+        finally:
+            db.session.close()  
 
-# Resource for Warehouse (CRUD operations)
 class WarehouseResource(Resource):
+    @auth.login_required  
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', required=True, help="ID cannot be blank!")
@@ -127,9 +147,11 @@ class WarehouseResource(Resource):
         except SQLAlchemyError as e:
             db.session.rollback()
             return {'message': 'Database error', 'data': str(e)}, 500
+        finally:
+            db.session.close()  
 
-# Resource for Commodity (CRUD operations)
 class CommodityResource(Resource):
+    @auth.login_required  
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', required=True, help="ID cannot be blank!")
@@ -149,9 +171,11 @@ class CommodityResource(Resource):
         except SQLAlchemyError as e:
             db.session.rollback()
             return {'message': 'Database error', 'data': str(e)}, 500
+        finally:
+            db.session.close()  
 
-# Resource for Farmer_Warehouse_Commodity with receipt validation and error handling
 class FarmerWarehouseCommodityResource(Resource):
+    @auth.login_required  
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', required=True, help="ID cannot be blank!")
@@ -161,7 +185,6 @@ class FarmerWarehouseCommodityResource(Resource):
         parser.add_argument('farmer_warehouse_commodity_receipt', required=True, help="Receipt cannot be blank!")
         args = parser.parse_args()
 
-        # Validate receipt
         receipt = args['farmer_warehouse_commodity_receipt']
         is_valid, error_message = validate_receipt(receipt)
         if not is_valid:
@@ -180,10 +203,11 @@ class FarmerWarehouseCommodityResource(Resource):
             return {'message': 'Farmer-Warehouse-Commodity record created successfully'}, 201
 
         except SQLAlchemyError as e:
-            db.session.rollback()  # Rollback in case of error
+            db.session.rollback()  
             return {'message': 'Database error', 'data': str(e)}, 500
-
-# Add resource routes
+        finally:
+            db.session.close()  
+3
 api.add_resource(FarmerResource, '/farmer')
 api.add_resource(WarehouseResource, '/warehouse')
 api.add_resource(CommodityResource, '/commodity')
