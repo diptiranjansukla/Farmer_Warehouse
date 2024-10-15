@@ -2,11 +2,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_httpauth import HTTPBasicAuth
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 # Initialize the app, database, API, and authentication
 db = SQLAlchemy()
