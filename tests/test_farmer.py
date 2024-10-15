@@ -8,7 +8,7 @@ class FarmerTest(unittest.TestCase):
     def setUpClass(cls):
         """ Set up the test app and database before all tests """
         cls.app = create_app()
-        cls.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory DB for testing
+        cls.app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:Sukla%40123@localhost/farmer_warehouse_db'
         cls.app.config['TESTING'] = True
         cls.client = cls.app.test_client()
 
@@ -38,7 +38,7 @@ class FarmerTest(unittest.TestCase):
     def test_farmer_creation_duplicate_id(self):
         """ Test that creating a farmer with duplicate ID fails """
         self.client.post('/farmer', json={
-            'id': 2,
+            'id': 222,
             'name': 'Jane Doe',
             'contact': '0987654321',
             'country': 'Country B',
@@ -48,7 +48,7 @@ class FarmerTest(unittest.TestCase):
         })
 
         response = self.client.post('/farmer', json={
-            'id': 2,
+            'id': 221,
             'name': 'Another Farmer',
             'contact': '1122334455',
             'country': 'Country C',
