@@ -3,3 +3,5 @@ flask-restful
 mysql-connector-python
 Flask-SQLAlchemy
 flask_httpauth
+python-dotenv
+pytest
