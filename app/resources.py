@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from app.models import Farmer, Warehouse, Commodity, FarmerWarehouseCommodity
-from app import db, auth
+from app.factory import db, auth
 from app.utils import validate_receipt
 
 class FarmerResource(Resource):
@@ -30,11 +30,14 @@ class FarmerResource(Resource):
             db.session.add(new_farmer)
             db.session.commit()
             return {'message': 'Farmer created successfully'}, 201
+        except IntegrityError:
+            db.session.rollback()
+            return {'message': 'Farmer with this ID already exists'}, 400  # Duplicate entry error
         except SQLAlchemyError as e:
             db.session.rollback()
             return {'message': 'Database error', 'data': str(e)}, 500
         finally:
-            db.session.close()  
+            db.session.close()
 
 class WarehouseResource(Resource):
     @auth.login_required  
@@ -62,11 +65,14 @@ class WarehouseResource(Resource):
             db.session.add(new_warehouse)
             db.session.commit()
             return {'message': 'Warehouse created successfully'}, 201
+        except IntegrityError:
+            db.session.rollback()
+            return {'message': 'Warehouse with this ID already exists'}, 400
         except SQLAlchemyError as e:
             db.session.rollback()
             return {'message': 'Database error', 'data': str(e)}, 500
         finally:
-            db.session.close()  
+            db.session.close()
 
 class CommodityResource(Resource):
     @auth.login_required  
@@ -86,11 +92,14 @@ class CommodityResource(Resource):
             db.session.add(new_commodity)
             db.session.commit()
             return {'message': 'Commodity created successfully'}, 201
+        except IntegrityError:
+            db.session.rollback()
+            return {'message': 'Commodity with this ID already exists'}, 400
         except SQLAlchemyError as e:
             db.session.rollback()
             return {'message': 'Database error', 'data': str(e)}, 500
         finally:
-            db.session.close()  
+            db.session.close()
 
 class FarmerWarehouseCommodityResource(Resource):
     @auth.login_required  
@@ -119,12 +128,11 @@ class FarmerWarehouseCommodityResource(Resource):
             db.session.add(new_record)
             db.session.commit()
             return {'message': 'Farmer-Warehouse-Commodity record created successfully'}, 201
-
+        except IntegrityError:
+            db.session.rollback()
+            return {'message': 'Record with this ID already exists'}, 400
         except SQLAlchemyError as e:
-            db.session.rollback()  
+            db.session.rollback()
             return {'message': 'Database error', 'data': str(e)}, 500
         finally:
-            db.session.close()  
-
-
-
+            db.session.close()

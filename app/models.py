@@ -1,4 +1,4 @@
-from app import db
+from app.factory import db
 from datetime import datetime, timezone
 
 class Farmer(db.Model):
