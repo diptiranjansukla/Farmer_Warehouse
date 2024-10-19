@@ -32,9 +32,9 @@ class FarmerTest(unittest.TestCase):
         auth_headers = self.get_auth_headers("admin", "password123")  # Adjust if necessary
 
         response = self.client.post('/farmer', json={
-            'id': 156,
-            'name': 'John Doe',
-            'contact': '1234567890',
+            'id': 256,
+            'name': 'ramesh das',
+            'contact': '1234567880',
             'country': 'Country A',
             'state': 'State A',
             'district': 'District A',
@@ -50,9 +50,9 @@ class FarmerTest(unittest.TestCase):
 
         # First request to create a farmer
         response = self.client.post('/farmer', json={
-            'id': 242,
-            'name': 'Jane Doe',
-            'contact': '0987654321',
+            'id': 342,
+            'name': 'asu sahoo',
+            'contact': '9987654321',
             'country': 'Country B',
             'state': 'State B',
             'district': 'District B',
@@ -63,8 +63,8 @@ class FarmerTest(unittest.TestCase):
 
         # Second request to create another farmer with the same ID (this should fail)
         response = self.client.post('/farmer', json={
-            'id': 242,
-            'name': 'Another Farmer',
+            'id': 342,
+            'name': 'Another Farmer2',
             'contact': '1122334455',
             'country': 'Country C',
             'state': 'State C',
