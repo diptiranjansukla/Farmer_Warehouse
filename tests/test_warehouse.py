@@ -1,22 +1,21 @@
 import unittest
 from app.factory import create_app, db
-from app.models import Farmer
+from app.models import Warehouse
 from base64 import b64encode
 
-class FarmerTest(unittest.TestCase):
+class WarehouseTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         """ Set up the test app and database before all tests """
         cls.app = create_app()
-
-        # Use SQLite in-memory database for testing instead of MySQL
         cls.app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:Sukla%40123@localhost/farmer_warehouse_db'
         cls.app.config['TESTING'] = True
         cls.client = cls.app.test_client()
 
         with cls.app.app_context():
             db.create_all()  # Create all tables
+
 
     # Helper function to generate basic authentication headers
     def get_auth_headers(self, username, password):
@@ -26,59 +25,49 @@ class FarmerTest(unittest.TestCase):
         }
         return auth_header
 
-    def test_farmer_creation(self):
-        """ Test the creation of a new farmer """
-        # Ensure that the username and password match those defined in the Flask app
+    def test_warehouse_creation(self):
+        """ Test the creation of a new warehouse """
         auth_headers = self.get_auth_headers("admin", "password123")  # Adjust if necessary
 
-        response = self.client.post('/farmer', json={
-            'id': 267,
-            'name': 'ramesh sahoo2',
-            'contact': '1224567888',
+        response = self.client.post('/warehouse', json={
+            'id': 111,
+            'name': 'Warehouse AA1',
             'country': 'Country A',
             'state': 'State A',
             'district': 'District A',
-            'village': 'Village A'
+            'village': 'Village A',
+            'capacity': 500
         }, headers=auth_headers)  # Pass auth headers with the request
-        print(response.json)
         self.assertEqual(response.status_code, 201)
-        self.assertIn('Farmer created successfully', response.json['message'])
+        self.assertIn('Warehouse created successfully', response.json['message'])
 
-    def test_farmer_creation_duplicate_id(self):
-        """ Test that creating a farmer with duplicate ID fails """
+    def test_warehouse_creation_duplicate_id(self):
+        """ Test that creating a warehouse with duplicate ID fails """
         auth_headers = self.get_auth_headers("admin", "password123")  # Ensure credentials are correct
 
-        # First request to create a farmer
-        response = self.client.post('/farmer', json={
-            'id': 345,
-            'name': 'ashu sah2',
-            'contact': '9988664321',
+        # First request to create a warehouse
+        self.client.post('/warehouse', json={
+            'id': 113,
+            'name': 'Warehouse BB1',
             'country': 'Country B',
             'state': 'State B',
             'district': 'District B',
             'village': 'Village B',
+            'capacity': 1000
         }, headers=auth_headers)
 
-        print(response.json)  # Debug: Print the response to see the result of the first request
-
-        # Second request to create another farmer with the same ID (this should fail)
-        response = self.client.post('/farmer', json={
-            'id': 345,
-            'name': 'Another Farmer4',
-            'contact': '1121304455',
+        # Second request to create another warehouse with the same ID (this should fail)
+        response = self.client.post('/warehouse', json={
+            'id': 113,
+            'name': 'Warehouse CC1',
             'country': 'Country C',
             'state': 'State C',
             'district': 'District C',
             'village': 'Village C',
+            'capacity': 800
         }, headers=auth_headers)
-
-        print(response.json)  # Debug: Print the response to see the result of the second request
-        
-        # Expect a 400 status code for duplicate entry
         self.assertEqual(response.status_code, 400)
-        
-        # Update to match the actual message returned by the API
-        self.assertIn('Farmer with this ID already exists', response.json['message'])
+        self.assertIn('Warehouse with this ID already exists', response.json['message'])
 
 if __name__ == '__main__':
     unittest.main()
