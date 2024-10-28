@@ -1,2 +1,2 @@
--- DELETE FROM farmer WHERE id IN (156, 242);
-SELECT * FROM warehouse;
+-- DELETE FROM farmer_warehouse_commodity WHERE id in(6,7);
+SELECT * FROM farmer_warehouse_commodity;
