@@ -39,12 +39,14 @@ class FarmerWarehouseCommodityTest(unittest.TestCase):
         auth_headers = self.get_auth_headers("admin", "password123")
 
         response = self.client.post('/farmer_warehouse_commodity', json={
-            'id': 6,
+            'id': 8,
             'farmer_id': 1,
             'warehouse_id': 101,
             'commodity_id': 101,
-            'farmer_warehouse_commodity_receipt': 'R-0001'
+            'farmer_warehouse_commodity_receipt': 'R-000122'
         }, headers=auth_headers)
+        
+        print(response.json)
 
         self.assertEqual(response.status_code, 201)
         self.assertIn('Farmer-Warehouse-Commodity record created successfully', response.json['message'])
@@ -55,20 +57,20 @@ class FarmerWarehouseCommodityTest(unittest.TestCase):
 
         # First request to create a Farmer-Warehouse-Commodity record
         self.client.post('/farmer_warehouse_commodity', json={
-            'id': 7,
+            'id': 9,
             'farmer_id': 10,
             'warehouse_id': 102,
             'commodity_id': 102,
-            'farmer_warehouse_commodity_receipt': 'R-0002'
+            'farmer_warehouse_commodity_receipt': 'R-000213'
         }, headers=auth_headers)
 
         # Second request with the same ID (should fail)
         response = self.client.post('/farmer_warehouse_commodity', json={
-            'id': 7,
+            'id': 9,
             'farmer_id': 7,
             'warehouse_id': 105,
             'commodity_id': 107,
-            'farmer_warehouse_commodity_receipt': 'R-0003'
+            'farmer_warehouse_commodity_receipt': 'R-00034'
         }, headers=auth_headers)
 
         self.assertEqual(response.status_code, 400)
