@@ -16,15 +16,13 @@ class FarmerWarehouseCommodityTest(unittest.TestCase):
         with cls.app.app_context():
             db.create_all()  # Create all tables
 
-            # # Adding initial data for Farmer, Warehouse, and Commodity to use in tests
-            # farmer = Farmer(id=1, name='Test Farmer', contact='1234567890', country='Country A', state='State A', district='District A', village='Village A')
-            # warehouse = Warehouse(id=1, name='Test Warehouse', country='Country A', state='State A', district='District A', village='Village A', capacity=1000)
-            # commodity = Commodity(id=1, commodity_name='Test Commodity', quantity=100)
+            # Adding initial data for Farmer, Warehouse, and Commodity to use in tests
+            farmer = Farmer(id=71, name='John Smith3', contact='1234567899', country='Country X1', state='State Y1', district='District Z1', village='Village Q1')
+            warehouse = Warehouse(id=200, name='Warehouse A', country='Country X', state='State Y', district='District Z', village='Village Q', capacity=5000)
+            commodity = Commodity(id=300, commodity_name='Corn', quantity=100)
 
-            # db.session.add(farmer)
-            # db.session.add(warehouse)
-            # db.session.add(commodity)
-            # db.session.commit()
+            db.session.add_all([farmer, warehouse, commodity])
+            db.session.commit()
 
     # Helper function to generate basic authentication headers
     def get_auth_headers(self, username, password):
@@ -39,11 +37,11 @@ class FarmerWarehouseCommodityTest(unittest.TestCase):
         auth_headers = self.get_auth_headers("admin", "password123")
 
         response = self.client.post('/farmer_warehouse_commodity', json={
-            'id': 8,
-            'farmer_id': 1,
-            'warehouse_id': 101,
-            'commodity_id': 101,
-            'farmer_warehouse_commodity_receipt': 'R-000122'
+            'id': 1001,
+            'farmer_id': 71,
+            'warehouse_id': 200,
+            'commodity_id': 300,
+            'farmer_warehouse_commodity_receipt': 'R-10001'
         }, headers=auth_headers)
         
         print(response.json)
@@ -57,39 +55,25 @@ class FarmerWarehouseCommodityTest(unittest.TestCase):
 
         # First request to create a Farmer-Warehouse-Commodity record
         self.client.post('/farmer_warehouse_commodity', json={
-            'id': 9,
-            'farmer_id': 10,
-            'warehouse_id': 102,
-            'commodity_id': 102,
-            'farmer_warehouse_commodity_receipt': 'R-000213'
+            'id': 1002,
+            'farmer_id': 71,
+            'warehouse_id': 200,
+            'commodity_id': 300,
+            'farmer_warehouse_commodity_receipt': 'R-10002'
         }, headers=auth_headers)
 
         # Second request with the same ID (should fail)
         response = self.client.post('/farmer_warehouse_commodity', json={
-            'id': 9,
-            'farmer_id': 7,
-            'warehouse_id': 105,
-            'commodity_id': 107,
-            'farmer_warehouse_commodity_receipt': 'R-00034'
+            'id': 1002,  # Duplicate ID
+            'farmer_id': 71,
+            'warehouse_id': 200,
+            'commodity_id': 300,
+            'farmer_warehouse_commodity_receipt': 'R-10003'
         }, headers=auth_headers)
 
         self.assertEqual(response.status_code, 400)
         self.assertIn('Record with this ID already exists', response.json['message'])
 
-    # def test_farmer_warehouse_commodity_creation_invalid_receipt(self):
-    #     """ Test that creating a Farmer-Warehouse-Commodity record with an invalid receipt fails """
-    #     auth_headers = self.get_auth_headers("admin", "password123")
-    #     # Attempt to create a record with an invalid receipt
-    #     response = self.client.post('/farmer_warehouse_commodity', json={
-    #         'id': 3,
-    #         'farmer_id': 1,
-    #         'warehouse_id': 1,
-    #         'commodity_id': 1,
-    #         'farmer_warehouse_commodity_receipt': 'InvalidReceipt'
-    #     }, headers=auth_headers)
-
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('Receipt must start with \'R-\' followed by at least 4 digits.', response.json['message'])
 
 if __name__ == '__main__':
     unittest.main()
